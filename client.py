@@ -9,6 +9,7 @@ host = '127.0.0.1'
 port = 12345
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((host, port))
+client_socket.settimeout(2.0)  # Set a timeout for the socket
 
 # Pygame settings
 pygame.init()
@@ -30,7 +31,7 @@ def send_position():
         data = pickle.dumps((player_pos, player_color))
         client_socket.sendall(len(data).to_bytes(4, byteorder='big'))
         client_socket.sendall(data)
-        pygame.time.wait(60)
+        pygame.time.wait(1)
 
 def receive_positions():
     global player_positions
@@ -41,16 +42,20 @@ def receive_positions():
         data_length = int.from_bytes(data_length, byteorder='big')
         
         data = b""
-        while len(data) < data_length:
+        try:
             chunk = client_socket.recv(data_length - len(data))
-            if not chunk:
-                break
-            data += chunk
+        except socket.timeout:
+            print("Socket timeout, retrying...")
+            continue
+        chunk = client_socket.recv(data_length - len(data))
+        if not chunk:
+            break
+        data += chunk
         
         try:
             player_positions = pickle.loads(data)
         except pickle.UnpicklingError:
-            print("Received corrupted data")
+            pass
 
 # Start threads for sending and receiving data
 threading.Thread(target=send_position, daemon=True).start()
