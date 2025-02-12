@@ -1,5 +1,6 @@
 import pygame
 import random
+from models.bullet import Bullet
 
 class Player:
     def __init__(self):
@@ -17,3 +18,6 @@ class Player:
             self.pos[0] -= self.speed
         if keys[pygame.K_d]:
             self.pos[0] += self.speed
+            
+    def shoot(self):
+        return Bullet(self.pos.copy(), [0, -1])
