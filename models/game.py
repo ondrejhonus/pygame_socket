@@ -16,36 +16,37 @@ class Game:
 
         while self.running:
             self.screen.fill((50, 50, 50))  # BG
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
 
-            keys = pygame.key.get_pressed()
-            self.player.move(keys)
-            self.player.shoot(keys)
-
-            # Send position to the server
-            self.client.send_position(self.player)
-
-            # Draw local player
-            pygame.draw.rect(self.screen, self.player.color, (*self.player.pos, self.player.size, self.player.size))
-
-            # Draw other players (positions + bullets)
-            for addr, (pos, color, bullets) in self.client.player_positions.items():
-                if addr != self.client.client_socket.getsockname():
-                    pygame.draw.rect(self.screen, color, (*pos, self.player.size, self.player.size))
-                for bullet_pos, bullet_direction in bullets:
-                    pygame.draw.circle(self.screen, (255, 0, 0), (int(bullet_pos[0]), int(bullet_pos[1])), 5)
-
-            for bullet in self.player.bullets:
-                bullet.move()
-                # bullet.draw(self.screen)
-                
+            self.draw()
             self.bullet_collision()
             
-            pygame.display.flip()
-            self.clock.tick(FPS)
+    def draw(self):
+        keys = pygame.key.get_pressed()
+        self.player.move(keys)
+        self.player.shoot(keys)
+
+        # Send position to the server
+        self.client.send_position(self.player)
+
+        # Draw local player
+        pygame.draw.rect(self.screen, self.player.color, (*self.player.pos, self.player.size, self.player.size))
+
+        # Draw other players (positions + bullets)
+        for addr, (pos, color, bullets) in self.client.player_positions.items():
+            if addr != self.client.client_socket.getsockname():
+                pygame.draw.rect(self.screen, color, (*pos, self.player.size, self.player.size))
+            for bullet_pos, bullet_direction in bullets:
+                pygame.draw.circle(self.screen, (255, 0, 0), (int(bullet_pos[0]), int(bullet_pos[1])), 5)
+
+        for bullet in self.player.bullets:
+            bullet.move()
+            # bullet.draw(self.screen)
+            
+        pygame.display.flip()
+        self.clock.tick(FPS)
                 
     def bullet_collision(self):
         # Check if bullet is out of bounds
