@@ -26,7 +26,7 @@ class Server:
                 if data_length == 0:
                     continue  # Ignore empty data
 
-                # Receive full data
+                # Receive full uncorrupted data
                 data = b""
                 while len(data) < data_length:
                     chunk = client_socket.recv(data_length - len(data))
@@ -45,10 +45,10 @@ class Server:
                 # Store the updated player data
                 self.player_positions[client_address] = player_data
 
-                # Broadcast updated data **except to the sender**
+                # Broadcast updated data but not to the sender
                 players_data = pickle.dumps(self.player_positions)
                 for client in self.clients:
-                    if client != client_socket:  # Do not send to the sender
+                    if client != client_socket:  # Do not send to the sender !!!
                         try:
                             client.sendall(len(players_data).to_bytes(4, byteorder='big'))
                             client.sendall(players_data)

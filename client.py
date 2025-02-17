@@ -51,7 +51,7 @@ class Client:
                         break
                     data += chunk
 
-                # Ensure we received everything before unpickling
+                # Check is data is not corrupted before accepting
                 if len(data) != data_length:
                     print(f"Data size mismatch. Expected {data_length}, got {len(data)}")
                     continue

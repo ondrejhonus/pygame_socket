@@ -4,7 +4,7 @@ class Bullet:
     def __init__(self, x, y, direction):
         self.pos = [x, y]
         self.speed = 10
-        self.direction = direction  # Direction should be a tuple (dx, dy)
+        self.direction = direction  # Direction should be tuple (dx, dy)
         self.size = 5
         self.color = (255, 0, 0)
 

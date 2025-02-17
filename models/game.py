@@ -15,20 +15,20 @@ class Game:
         print("Game loop started!")
 
         while self.running:
-            self.screen.fill((50, 50, 50))  # Background color
+            self.screen.fill((50, 50, 50))  # BG
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
 
-            keys = pygame.key.get_pressed()  # Get keys here
-            self.player.move(keys)  # Move player
-            self.player.shoot(keys)  # Handle shooting
+            keys = pygame.key.get_pressed()
+            self.player.move(keys)
+            self.player.shoot(keys)
 
             # Send position to the server
             self.client.send_position(self.player)
 
-            # Draw the local player
+            # Draw local player
             pygame.draw.rect(self.screen, self.player.color, (*self.player.pos, self.player.size, self.player.size))
 
             # Draw other players (positions + bullets)
@@ -38,7 +38,6 @@ class Game:
                 for bullet_pos, bullet_direction in bullets:
                     pygame.draw.circle(self.screen, (255, 0, 0), (int(bullet_pos[0]), int(bullet_pos[1])), 5)
 
-            # Update bullets
             for bullet in self.player.bullets:
                 bullet.move()
                 # bullet.draw(self.screen)
