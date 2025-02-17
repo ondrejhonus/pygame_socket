@@ -41,7 +41,7 @@ class Game:
             # Update bullets
             for bullet in self.player.bullets:
                 bullet.move()
-                bullet.draw(self.screen)
+                # bullet.draw(self.screen)
             
             pygame.display.flip()
             self.clock.tick(60)
