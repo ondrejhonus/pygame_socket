@@ -63,5 +63,6 @@ class Game:
                     bullet_rect = pygame.Rect(bullet.pos[0], bullet.pos[1], 5, 5)
                     if player_rect.colliderect(bullet_rect):
                         print(f"Bullet hit player at {pos}")
+                        self.player.hp -= 10
                         self.player.bullets.remove(bullet)
                         break

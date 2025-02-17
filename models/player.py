@@ -11,6 +11,7 @@ class Player:
         self.speed = 5
         self.bullets = [] 
         self.last_shot_time = 0  # Track the last time a bullet was shot
+        self.hp = 100
 
     def move(self, keys):
 
