@@ -27,6 +27,7 @@ class Player:
         current_time = time.time()
         if keys[pygame.K_SPACE] and current_time - self.last_shot_time >= .5:  # PShoot once per sec
             mouse_x, mouse_y = pygame.mouse.get_pos()
+            # Dont ask me how this works
             direction = (mouse_x - self.pos[0], mouse_y - self.pos[1])
             magnitude = (direction[0]**2 + direction[1]**2) ** 0.5
             direction = (direction[0] / magnitude, direction[1] / magnitude)

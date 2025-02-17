@@ -61,7 +61,7 @@ class Client:
                     received_data = pickle.loads(data)
                     if isinstance(received_data, dict):
                         self.player_positions = received_data
-                        print(f"Received positions: {self.player_positions}")
+                        # print(f"Received positions: {self.player_positions}")
                     else:
                         print("Received data is not a dictionary.")
                 except pickle.UnpicklingError as e:

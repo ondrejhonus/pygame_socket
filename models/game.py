@@ -1,14 +1,14 @@
 import pygame
 from models.player import Player
 from models.bullet import Bullet
-
+from settings import WINDOW_WIDTH, WINDOW_HEIGHT, FPS
 
 class Game:
     def __init__(self, client, player):
         self.client = client
         self.player = player
         self.running = True
-        self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
 
     def run(self):
@@ -41,8 +41,26 @@ class Game:
             for bullet in self.player.bullets:
                 bullet.move()
                 # bullet.draw(self.screen)
+                
+            self.bullet_collision()
             
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(FPS)
+                
+    def bullet_collision(self):
+        # Check if bullet is out of bounds
+        for bullet in self.player.bullets:
+            if bullet.pos[0] < 0 or bullet.pos[0] > WINDOW_WIDTH or bullet.pos[1] < 0 or bullet.pos[1] > WINDOW_HEIGHT:
+                print("Bullet out of bounds")
+                self.player.bullets.remove(bullet)
+                continue
 
-
+            # Check collision with other players
+            for addr, (pos, color, bullets) in self.client.player_positions.items():
+                if addr != self.client.client_socket.getsockname():
+                    player_rect = pygame.Rect(*pos, self.player.size, self.player.size)
+                    bullet_rect = pygame.Rect(bullet.pos[0], bullet.pos[1], 5, 5)
+                    if player_rect.colliderect(bullet_rect):
+                        print(f"Bullet hit player at {pos}")
+                        self.player.bullets.remove(bullet)
+                        break
