@@ -23,6 +23,8 @@ class Game:
 
             self.draw()
             self.bullet_collision()
+        else:
+            self.game_lost()
             
     def draw(self):
         keys = pygame.key.get_pressed()
@@ -70,4 +72,30 @@ class Game:
                         print(f"Bullet hit player at {pos}")
                         self.client.send_damage(addr, 10)
                         self.player.bullets.remove(bullet)
+                        self.game_won()
                         break
+    def game_won(self):
+        print("Game over!")
+        self.screen.fill((0, 0, 0))
+        font = pygame.font.Font(None, 74)
+        game_over_text = font.render("YOU WON", True, (0, 255, 0))
+        text_rect = game_over_text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
+        self.screen.blit(game_over_text, text_rect)
+        pygame.display.flip()
+        pygame.time.wait(3000)
+        self.running = False
+        pygame.quit()
+        quit()
+    
+    def game_lost(self):
+        print("Game over!")
+        self.running = False
+        self.screen.fill((0, 0, 0))
+        font = pygame.font.Font(None, 74)
+        game_over_text = font.render("YOU LOST", True, (255, 0, 0))
+        text_rect = game_over_text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
+        self.screen.blit(game_over_text, text_rect)
+        pygame.display.flip()
+        pygame.time.wait(3000)
+        pygame.quit()
+        quit()

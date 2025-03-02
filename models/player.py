@@ -7,7 +7,7 @@ class Player:
     def __init__(self):
         self.size = 50
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        self.pos = [375, 275]
+        self.pos = [random.randint(100, 800), random.randint(0, 600)]
         self.speed = 5
         self.bullets = [] 
         self.last_shot_time = 0  # Track the last time a bullet was shot
