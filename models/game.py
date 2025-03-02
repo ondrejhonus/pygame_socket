@@ -10,6 +10,7 @@ class Game:
         self.running = True
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
+        pygame.font.init()
 
     def run(self):
         print("Game loop started!")
@@ -27,26 +28,30 @@ class Game:
         keys = pygame.key.get_pressed()
         self.player.move(keys)
         self.player.shoot(keys)
-
-        # Send position to the server
         self.client.send_position(self.player)
 
-        # Draw local player
-        pygame.draw.rect(self.screen, self.player.color, (*self.player.pos, self.player.size, self.player.size))
+        font = pygame.font.Font(None, 24)
 
-        # Draw other players (positions + bullets)
-        for addr, (pos, color, bullets) in self.client.player_positions.items():
+        pygame.draw.rect(self.screen, self.player.color, (*self.player.pos, self.player.size, self.player.size))
+        hp_text = font.render(f"{self.player.hp} HP", True, (255, 255, 255))
+        self.screen.blit(hp_text, (self.player.pos[0], self.player.pos[1] - 20))
+        # print(self.client.player_positions)
+        for addr, (pos, color, bullets, hp) in self.client.player_positions.items():
             if addr != self.client.client_socket.getsockname():
                 pygame.draw.rect(self.screen, color, (*pos, self.player.size, self.player.size))
+                hp_text = font.render(f"{hp} HP", True, (255, 255, 255))
+                self.screen.blit(hp_text, (pos[0], pos[1] - 20))
+
+
             for bullet_pos, bullet_direction in bullets:
                 pygame.draw.circle(self.screen, (255, 0, 0), (int(bullet_pos[0]), int(bullet_pos[1])), 5)
 
         for bullet in self.player.bullets:
             bullet.move()
-            # bullet.draw(self.screen)
-            
+        
         pygame.display.flip()
         self.clock.tick(FPS)
+
                 
     def bullet_collision(self):
         # Check if bullet is out of bounds
@@ -57,12 +62,12 @@ class Game:
                 continue
 
             # Check collision with other players
-            for addr, (pos, color, bullets) in self.client.player_positions.items():
+            for addr, (pos, color, bullets, hp) in self.client.player_positions.items():
                 if addr != self.client.client_socket.getsockname():
                     player_rect = pygame.Rect(*pos, self.player.size, self.player.size)
                     bullet_rect = pygame.Rect(bullet.pos[0], bullet.pos[1], 5, 5)
                     if player_rect.colliderect(bullet_rect):
                         print(f"Bullet hit player at {pos}")
-                        self.player.hp -= 10
+                        self.client.send_damage(addr, 10)
                         self.player.bullets.remove(bullet)
                         break

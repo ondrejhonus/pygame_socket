@@ -1,6 +1,7 @@
 import socket
 import threading
 import pickle
+import time
 
 class Server:
     def __init__(self, host, port):
@@ -37,31 +38,54 @@ class Server:
 
                 # Unpickle the received data
                 try:
-                    player_data = pickle.loads(data)
-                except pickle.UnpicklingError:
-                    print("Failed to unpickle data.")
+                    message = pickle.loads(data)
+                    if isinstance(message, dict) and message.get('action') == 'damage':
+                        self.apply_damage(message['addr'], message['damage'])
+                    else:
+                        pos, color, bullets, hp = message  # Extract HP from data
+                        self.player_positions[client_address] = (pos, color, bullets, hp)
+                        print(f"Updated player position for {client_address}: {self.player_positions[client_address]}")
+                except Exception as e:
+                    print(f"Failed to unpickle data from {client_address}: {e}")
                     continue
 
-                # Store the updated player data
-                self.player_positions[client_address] = player_data
-
-                # Broadcast updated data but not to the sender
+                # Broadcast updated data
                 players_data = pickle.dumps(self.player_positions)
                 for client in self.clients:
-                    if client != client_socket:  # Do not send to the sender !!!
+                    if client != client_socket:
                         try:
                             client.sendall(len(players_data).to_bytes(4, byteorder='big'))
                             client.sendall(players_data)
                         except Exception as e:
                             print(f"Failed to send data to {client}: {e}")
 
-        except Exception as e:
-            print(f"Error with client {client_address}: {e}")
+                # time.sleep(0.1)  # delay game, decrease fps basically
+
+        except (ConnectionResetError, EOFError):
+            print(f"Client {client_address} disconnected.")
         finally:
             client_socket.close()
             if client_socket in self.clients:
                 self.clients.remove(client_socket)
             self.player_positions.pop(client_address, None)
+
+    def apply_damage(self, addr, damage):
+        if addr in self.player_positions:
+            pos, color, bullets, hp = self.player_positions[addr]
+            hp -= damage
+            # hp cant be negative
+            hp = max(hp, 0)
+            
+            self.player_positions[addr] = (pos, color, bullets, hp)
+            print(f"Applied {damage} damage to {addr}. New HP: {hp}")
+            
+            players_data = pickle.dumps(self.player_positions)
+            for client in self.clients:
+                try:
+                    client.sendall(len(players_data).to_bytes(4, byteorder='big'))
+                    client.sendall(players_data)
+                except Exception as e:
+                    print(f"Failed to send data to {client}: {e}")
 
     def accept_connections(self):
         while True:

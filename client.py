@@ -3,7 +3,6 @@ import threading
 import pickle
 from models.game import Game
 from models.player import Player
-from time import sleep
 
 class Client:
     def __init__(self, host, port):
@@ -12,7 +11,7 @@ class Client:
         self.port = port
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host, port))
-        self.client_socket.settimeout(5.0)  # Set a timeout for the socket
+        self.client_socket.settimeout(10.0)  # Set a timeout for the socket
         self.player_positions = {}
         print("Connected!")
 
@@ -21,10 +20,9 @@ class Client:
 
     def send_position(self, player):
         try:
-            data = pickle.dumps((player.pos, player.color, [(b.pos, b.direction) for b in player.bullets]))
+            data = pickle.dumps((player.pos, player.color, [(b.pos, b.direction) for b in player.bullets], player.hp))
             self.client_socket.sendall(len(data).to_bytes(4, byteorder='big'))
             self.client_socket.sendall(data)
-            sleep(0.01) 
         except Exception as e:
             print(f"Failed to send position: {e}")
 
@@ -51,7 +49,7 @@ class Client:
                         break
                     data += chunk
 
-                # Check is data is not corrupted before accepting
+                # Check if data is not corrupted before accepting
                 if len(data) != data_length:
                     print(f"Data size mismatch. Expected {data_length}, got {len(data)}")
                     continue
@@ -61,7 +59,10 @@ class Client:
                     received_data = pickle.loads(data)
                     if isinstance(received_data, dict):
                         self.player_positions = received_data
-                        # print(f"Received positions: {self.player_positions}")
+                        for addr, (_, _, _, hp) in self.player_positions.items():
+                            print(f"Updated {addr} - HP: {hp}")  # print player HP
+                            if addr == self.client_socket.getsockname():
+                                player.hp = hp
                     else:
                         print("Received data is not a dictionary.")
                 except pickle.UnpicklingError as e:
@@ -72,6 +73,16 @@ class Client:
                 print(f"Failed to receive positions: {e}")
                 break
 
+
+    def send_damage(self, addr, damage):
+        try:
+            message = {'action': 'damage', 'addr': addr, 'damage': damage}
+
+            data = pickle.dumps(message)
+            data_length = len(data).to_bytes(4, byteorder='big')
+            self.client_socket.sendall(data_length + data)
+        except Exception as e:
+            print(f"Error sending damage to server: {e}")
 
 if __name__ == "__main__":
     print("Starting client...")
