@@ -7,10 +7,11 @@ class Player:
     def __init__(self):
         self.size = 50
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        self.pos = [375, 275]
+        self.pos = [random.randint(100, 800), random.randint(0, 600)]
         self.speed = 5
         self.bullets = [] 
         self.last_shot_time = 0  # Track the last time a bullet was shot
+        self.hp = 100
 
     def move(self, keys):
 
@@ -27,6 +28,7 @@ class Player:
         current_time = time.time()
         if keys[pygame.K_SPACE] and current_time - self.last_shot_time >= .5:  # PShoot once per sec
             mouse_x, mouse_y = pygame.mouse.get_pos()
+            # Dont ask me how this works
             direction = (mouse_x - self.pos[0], mouse_y - self.pos[1])
             magnitude = (direction[0]**2 + direction[1]**2) ** 0.5
             direction = (direction[0] / magnitude, direction[1] / magnitude)
