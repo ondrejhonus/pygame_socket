@@ -7,21 +7,20 @@ class Player:
     def __init__(self):
         self.size = 50
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        self.pos = [random.randint(100, 800), random.randint(0, 600)]
+        self.pos = [random.randint(100, 700), random.randint(100, 500)]
         self.speed = 5
         self.bullets = [] 
         self.last_shot_time = 0  # Track the last time a bullet was shot
         self.hp = 100
 
     def move(self, keys):
-
-        if keys[pygame.K_w]:
+        if keys[pygame.K_w] and self.pos[1] - self.speed >= 0:
             self.pos[1] -= self.speed
-        if keys[pygame.K_s]:
+        if keys[pygame.K_s] and self.pos[1] + self.speed + self.size <= 600:
             self.pos[1] += self.speed
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] and self.pos[0] - self.speed >= 0:
             self.pos[0] -= self.speed
-        if keys[pygame.K_d]:
+        if keys[pygame.K_d] and self.pos[0] + self.speed + self.size <= 800:
             self.pos[0] += self.speed
 
     def shoot(self, keys):
