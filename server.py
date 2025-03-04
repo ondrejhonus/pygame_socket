@@ -2,6 +2,7 @@ import socket
 import threading
 import pickle
 import time
+from settings import SERVER_PORT
 
 class Server:
     def __init__(self, host, port):
@@ -95,5 +96,8 @@ class Server:
             threading.Thread(target=self.handle_client, args=(client_socket, client_address), daemon=True).start()
 
 if __name__ == "__main__":
-    server = Server('127.0.0.1', 12345)
+    server_ip = input("Enter server IP (default: localhost): ")
+    if server_ip == "":
+        server_ip = "localhost"
+    server = Server(server_ip, SERVER_PORT)
     server.accept_connections()
