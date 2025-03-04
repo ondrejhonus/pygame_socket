@@ -11,12 +11,12 @@ class Game:
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
         pygame.font.init()
+        self.bg_image = pygame.image.load('sprites/bg.png')
 
     def run(self):
         print("Game loop started!")
 
         while self.running:
-            self.screen.fill((50, 50, 50))  # BG
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -27,6 +27,8 @@ class Game:
             self.game_lost()
             
     def draw(self):
+        self.screen.blit(self.bg_image, (0, 0))  # Draw the background image
+
         keys = pygame.key.get_pressed()
         self.player.move(keys)
         self.player.shoot(keys)
@@ -35,13 +37,13 @@ class Game:
         font = pygame.font.Font(None, 24)
 
         pygame.draw.rect(self.screen, self.player.color, (*self.player.pos, self.player.size, self.player.size))
-        hp_text = font.render(f"{self.player.hp} HP", True, (255, 255, 255))
+        hp_text = font.render(f"{self.player.hp} HP", True, (0, 0, 0))
         self.screen.blit(hp_text, (self.player.pos[0], self.player.pos[1] - 20))
         # print(self.client.player_positions)
         for addr, (pos, color, bullets, hp) in self.client.player_positions.items():
             if addr != self.client.client_socket.getsockname():
                 pygame.draw.rect(self.screen, color, (*pos, self.player.size, self.player.size))
-                hp_text = font.render(f"{hp} HP", True, (255, 255, 255))
+                hp_text = font.render(f"{hp} HP", True, (0, 0, 0))
                 self.screen.blit(hp_text, (pos[0], pos[1] - 20))
 
 
